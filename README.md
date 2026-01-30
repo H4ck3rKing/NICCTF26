@@ -22,18 +22,6 @@ A comprehensive collection of writeups for challenges from NICCTF 2026.
 - [Reversing](#reversing)
   - [KeyedUp](#keyedup)
 
-## Challenge Statistics
-
-| Category | Easy | Medium | Hard | Total |
-|----------|------|--------|------|-------|
-| Web | 0 | 1 | 0 | 1 |
-| Misc | 1 | 0 | 0 | 1 |
-| Cryptography | 1 | 0 | 0 | 1 |
-| OSINT | 3 | 0 | 0 | 3 |
-| Forensics | 2 | 2 | 0 | 4 |
-| Reversing | 1 | 0 | 0 | 1 |
-| **Total** | **8** | **3** | **0** | **11** |
-
 ---
 
 ## Web
